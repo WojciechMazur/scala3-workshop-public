@@ -3,13 +3,13 @@
 
 case class MyContext(databaseURL: String)
 
-def start() = 
+def start() = {
   given ctx: MyContext = MyContext("https://prod.db/api")
   // Context is being implicitlly passed to the function call
   functionUsingContext(42)
   // Explicitlly passing context to function
-  functionUsingContext(42)(using MyContext("https://test.db/api/v2/")) 
-
+  functionUsingContext(42)(using MyContext("https://test.db/api/v2/"))
+}
 // Using declares that given function uses implicit instance of MyContext
 def functionUsingContext(arg: Int)(using MyContext) = 
   // Summon instance of MyContext from implicitlly passed value
@@ -77,11 +77,11 @@ object LogarithmsSupport:
     def + (y: Logarithm): Logarithm = Logarithm(math.exp(x) + math.exp(y))
     def * (y: Logarithm): Logarithm = x + y
 
+
 import LogarithmsSupport._
 
 val log10 = Logarithm(10)
 val log2 = Logarithm(2)
-
 val logs = log10 * log2
 val addsLogs = log10 + log2
 logs.toDouble

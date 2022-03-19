@@ -30,17 +30,19 @@ def notImplemented: Nothing = ???
 /// Custom types
 
 // Główny konstructor przymuje 2 argumenty (Int, String) oraz tworzy prywatne pola foo, bar wewnątrz klasy
-class MyClass(foo: Int, bar: String = "") {
+class MyClass(val foo: Int, bar: String = "") {
   // Drugorzędny kontruktor dla classy
   def this(string: String) = this(string.length, string)
 
   private val fooBar = s"$foo$bar"
 
-  def length = bar.length
+  val length = bar.length
 
   // Wszystkie wyrażenia które nie są definicjami metod lub pól wewnątrz klasy zostają wykonane w trakcie wykonywanie głownego konstruktowa
   println("MyClass is beining initialized")
 }
+// val cls: MyClass = MyClass(0)
+// cls
 
 // object służy do utworzenia klasy która posiada tylko jedna instancję (singleton)
 // jeśli object ma taką samą nazwę jak klasa zdefiniowana w tym samym pliku to nazywamy go 'companion object'
@@ -110,7 +112,7 @@ enum Shape:
 
 // Aliasy typów
 type Meter = Double
-val distance: Meter = 10
+var distance: Meter = 10
 
 // Union/intersecion types types
 trait A {
@@ -135,7 +137,7 @@ doSomething(new A with B)
 
 // Generics
 
-def log[T](v: T) = println(s"It's $v")
+def log[T <: Any](v: T) = println(s"It's $v")
 log("a message")
 log(42.0)
 
@@ -152,12 +154,3 @@ def pet[T <: Pet](toPet: T) = {
 pet(Cat("Alex"))
 // pet(Crocodile("T-rex"))
 pet(new Dog("Golden Retriver") with Pet { def name: String = "Scruffy" })
-
-def add[T: Numeric](left: T, right: T): T = {
-  summon[Numeric[T]].plus(left, right)
-}
-
-add(1, 1)
-add(1.0, 2.0)
-// Different types, want compile
-// add(1.toByte, 1)

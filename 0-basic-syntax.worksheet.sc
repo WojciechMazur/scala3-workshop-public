@@ -1,34 +1,4 @@
 
-// git clone --branch workshop https://github.com/WojciechMazur/scala3-workshop.git
-
-
-
-
-
-Sieć: VL-HELP
-PASSOWORD: UAHELP22
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // W Scali najcześciej uzywa się nie mutowalnych zmiennych
 val openingMessage = "Hello world"
 // openingMessage = "" // Kompilator nie pozwoli nam przypisać ponownie do zmienej
@@ -42,7 +12,7 @@ luckyNumber
 
 // Funckję tworzymy za pomocą słowa kluczowego def
 // Ciało funkcji zostanie wykonane za każdym razem
-def getSomeNumber = 
+def getSomeNumber() = 
   println("getting some number")
   lazyInitializedNumber
 
@@ -52,8 +22,8 @@ lazy val lazyInitializedNumber =
   println("creating lazy number")
   luckyNumber * 2 + 3
 
-getSomeNumber
-getSomeNumber
+getSomeNumber()
+getSomeNumber()
 
 // Dostępne typy primitywne:
 val b: Byte = 10
@@ -71,7 +41,7 @@ val str = "Hello"
 // Możliwe jest użycie zmiennych bądź wyrażeń do stworzenia nowego ciągu znaków
 val str2 = s"$str Steve, it's ${(c + 12) % 24} o'clock"
 // A także ich dokładniejsze formatiwanie, np. określając liczbe miejsc po przecinku
-val str3 = f"Height: $d%2.3f, unformatted $d"
+val str3 = f"Height: $d%2.2f, unformatted $d"
 
 // Instrukcja warunkowa w Scali ma dwie dostępne formy
 if luckyNumber < 10 then println("<10") // Nowa składnia: if <cond> then <then>
@@ -102,7 +72,6 @@ Option.when(true)("Hello") match {
 }
 
 // Pętle
-
 // Do iterowanie po sekwencji możemy użyć pętli for-do
 for n <- 0.until(5)
 do
@@ -135,6 +104,6 @@ while {
 
 println("Hello world")
 
-// import scala.io.StdIn
+import scala.io.StdIn
 // val line = StdIn.readLine()
 // val boolean = StdIn.readBoolean()

@@ -7,6 +7,7 @@ def getData(str: String): Option[String] =
 
 val result = for
   content <- getContent()
+  size = content.size
   data <- getData(content)
   if data.length > 5
 yield data

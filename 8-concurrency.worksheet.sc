@@ -12,6 +12,7 @@ val f = Future {
   s"I'm (probablly) in different thread - ${Thread.currentThread}"
 }
 
+
 // register a callback upon future completion
 // Promise is a wrapper for a value that might have not been completed yet
 var callbackResult = Promise[String]
@@ -62,6 +63,10 @@ val task = for {
 } yield "done"
 
 Await.result(task, 10.seconds)
+
+
+val f1: Future[Unit] = Future{println("hello")}
+val f2: Future[Unit] = Future{println("hello")}
 
 // Execution in parallel
 val taskPar = for {

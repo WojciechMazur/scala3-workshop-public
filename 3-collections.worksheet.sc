@@ -3,6 +3,7 @@
 val array = Array('a', 'b', 'c')
 val list = List(1, 2, 3)
 val list2 = 1 :: 2 :: 3 :: Nil
+
 val vector = Vector(1.0, 2.0, 3.0)
 val set = Set("a", "b", "a", "c")
 val map = Map(

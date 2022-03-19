@@ -23,16 +23,40 @@ val input =
     |10,The choosen one,B,1660,30
     |""".stripMargin
 
-// val entries = List.empty
-// assert(entries.size == 10)
+class Entry(
+    val id: String,
+    val name: String,
+    val sectionId: String,
+    val salary: Int,
+    val age: Int
+)
 
-// val averageAge = ???
-// assert(averageAge == 30)
+def isNumber(s: String) = s.forall(_.isDigit)
 
-// val salariesBySection = Map("A" -> -1, "B" -> -1, "C" -> -1)
-// assert(salariesBySection("A") == 1033)
-// assert(salariesBySection("B") == 1665)
-// assert(salariesBySection("C") == 2266)
+val entries = input
+  .split("\n")
+  .map(_.split(",").map(_.trim))
+  .toList
+  .filter(line => !line.exists(field => field.isEmpty))
+  .collect {
+    case Array(id, name, sectionId, salary, age)
+        if isNumber(salary) && isNumber(age) =>
+      Entry(id, name, sectionId, salary.toInt, age.toInt)
+  }
+  .toList
+assert(entries.size == 10)
 
-// val withMaxSalary = ???
-// assert(withMaxSalary.id == "6" && withMaxSalary.salary == 3000)
+val averageAge = entries.map(_.age).sum / entries.size
+assert(averageAge == 30)
+
+val salariesBySection = entries
+  .groupBy(_.sectionId)
+  .view
+  .mapValues {group => group.map(_.salary).sum / group.size  }
+  .toMap
+assert(salariesBySection("A") == 1033)
+assert(salariesBySection("B") == 1665)
+assert(salariesBySection("C") == 2266)
+
+val withMaxSalary = entries.maxBy(_.salary)
+assert(withMaxSalary.id == "6" && withMaxSalary.salary == 3000)

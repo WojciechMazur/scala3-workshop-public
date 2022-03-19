@@ -86,7 +86,6 @@ def fiboncacii(n: Int): Num = {
     case 0 => 0
     case 1 => 1
     case n =>
-      println(n)
       // Not tail recursive, after calling itself needs to operate on returned value
       cached(n - 2) + cached(n - 1)
   }
