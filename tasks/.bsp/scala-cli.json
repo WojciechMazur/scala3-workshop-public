@@ -1,0 +1,16 @@
+{
+  "name": "scala-cli",
+  "argv": [
+    "/usr/share/scala/scala-cli",
+    "bsp",
+    "--json-options",
+    "/home/wmazur/projects/virtuslab/scala3-workshop/tasks/.scala-build/ide-options.json",
+    "/home/wmazur/projects/virtuslab/scala3-workshop/tasks"
+  ],
+  "version": "0.1.2",
+  "bspVersion": "2.0.0",
+  "languages": [
+    "scala",
+    "java"
+  ]
+}
