@@ -1,5 +1,3 @@
-//> using scala "3.0.1"
-
 //> using lib "com.lihaoyi::cask:0.8.0"
 //> using lib "com.lihaoyi::requests:0.7.0"
 //> using lib "com.lihaoyi::scalatags:0.11.1"
