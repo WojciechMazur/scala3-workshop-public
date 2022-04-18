@@ -1,5 +1,6 @@
-/** W Scali wszystko ma jakiś typ https://docs.scala-lang.org/tour/unified-types.html Any / \ AnyVal
-  * AnyRef Int Long Unit Float Double | String Option <custom types> \ | / Nothing
+/** W Scali wszystko ma jakiś typ
+  * https://docs.scala-lang.org/tour/unified-types.html Any / \ AnyVal AnyRef
+  * Int Long Unit Float Double | String Option <custom types> \ | / Nothing
   */
 
 var anyVal: AnyVal = _
@@ -142,8 +143,9 @@ log(42.0)
 trait Pet extends Animal {
   def name: String
 }
-case class Crocodile(name: String) extends Animal 
+case class Crocodile(name: String) extends Animal
 case class Cat(name: String) extends Pet
+case class Hamster(name: String) extends Pet
 
 def pet[T <: Pet](toPet: T) = {
   println(s"Petting $toPet with name ${toPet.name}")
@@ -161,3 +163,58 @@ add(1, 1)
 add(1.0, 2.0)
 // Different types, want compile
 // add(1.toByte, 1)
+
+// Variance of generic types - Invariance, covariance, contravariance
+
+// By default generic types are defined as Invariant (similary as in Java)
+// Even though Cat is a subtype of Pet, Container[Cat] is not a Container[Pet]
+// Also Container[Pet] is not a Container[Cat]
+class Container[A](var value: A)
+val catContainer = new Container(Cat("Whiskers"))
+// val petContainer: Container[Pet] = catContainer // it would no compile
+// petContainer.value = Hamster("")
+val cat: Cat = catContainer.value // We would get a Hamster instead of Cat here
+
+// List is an example of covariant class (List[+T])
+// It means that List[Cat] is a subtype of List[Pet]
+// List[Pet] is not a List[Cat]
+val cats: List[Cat] = List(Cat("Whiskers"), Cat("Tom"))
+val hamsters: List[Hamster] = List(Hamster("Fido"), Hamster("Rex"))
+val pets: List[Pet] = cats // We can assign List[Cats] to List[Pet]
+val allPets: List[Pet] =
+  cats ++ hamsters // Or combine both List[Cats] and List[Pet] into a single list
+allPets.map(_.name)
+// List[Pet] =!= List[Cat], we cannot assign pets to List[Cat]
+// val petsAsCats: List[Cat] = pets
+
+// Contravariance is a reversed Covariance
+// Printer[Cat] is not a subtype of Printer[Pet]
+// Printer[Pet] is a subtype of Printer[Cat]
+abstract class Printer[-T] {
+  def print(value: T): Unit
+}
+class PetPrinter extends Printer[Pet] {
+  def print(pet: Pet): Unit =
+    println("The pet's name is: " + pet.name)
+}
+
+class CatPrinter extends Printer[Cat] {
+  def print(cat: Cat): Unit =
+    println("The cat's name is: " + cat.name)
+}
+def printMyCat(printer: Printer[Cat], cat: Cat): Unit =
+  printer.print(cat)
+
+val catPrinter: Printer[Cat] = new CatPrinter
+val petPrinter: Printer[Pet] = new PetPrinter
+// We cannot assign Printer[Cat] to Printer[Pet]
+// val petPrinter: Printer[Pet] = catPrinter
+
+val cat1 = Cat("Boots")
+printMyCat(catPrinter, cat1)
+printMyCat(petPrinter, cat1)
+// When Printer#T is defined as invariant Printer[T] it would not compile
+
+def printMyPet(printer: Printer[Pet], pet: Pet): Unit = printer.print(pet)
+printMyPet(petPrinter, cat1)
+// printMyPet(catPrinter, cat1) // Would not compile

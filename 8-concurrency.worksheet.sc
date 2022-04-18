@@ -6,27 +6,38 @@ import scala.util.{Failure, Success}
 // maintaing threads pool in which the execution would be performed
 given ExecutionContext = ExecutionContext.Implicits.global
 
+// CAUTION - when executing this script via scala-cli run it might finish with errors
+// To fix this wrap expressions within a function and call it
+// When executing as a worksheet it should work fine
+
 val f = Future {
+  println(s"I'm in thread - ${Thread.currentThread}")
   Thread.sleep(100)
   // sys.error("panic!")
-  s"I'm (probablly) in different thread - ${Thread.currentThread}"
+  println(s"I'm (probablly) in different thread - ${Thread.currentThread}")
+  42
 }
 
 // register a callback upon future completion
 // Promise is a wrapper for a value that might have not been completed yet
-var callbackResult = Promise[String]
+val callbackResult = Promise[String]
 f.onComplete {
-  case Success(v) => callbackResult.complete(Success(s"Finished, result: $v"))
+  case Success(v) =>
+    println("Future completed with success")
+    callbackResult.complete(Success(s"Finished, result: $v"))
   case Failure(reason) =>
-    callbackResult.complete(Failure(RuntimeException(s"Computation failed - $reason")))
+    println("Future completed with failure")
+    callbackResult.complete(
+      Failure(RuntimeException(s"Computation failed - $reason"))
+    )
 }
 
 // Block until Future is completed, return Future[T]
 Await.ready(f, 1.second)
 // Block until Future is completed, retunr result T
-println(callbackResult.isCompleted)
-Await.result(callbackResult.future, 10.second)
-println(callbackResult)
+println("IsCompleted? " + callbackResult.isCompleted)
+Await.result(callbackResult.future, 5.second)
+println(s"Completed with $callbackResult")
 
 case class User(name: String)
 def getUsers(): Future[List[User]] = Future {
@@ -57,11 +68,12 @@ def notifyUserChange(user: User): Future[Unit] = Future {
 // Chaining Futures sequentially
 val task = for {
   users <- getUsers()
-  _ <- updateUsers(users) // starts when getUsers is done - execution is sequenced
+  _ <- updateUsers(users)
+  // starts when getUsers is done - execution is sequenced
   _ <- Future.traverse(users)(notifyUserChange)
 } yield "done"
 
-Await.result(task, 10.seconds)
+Await.result(task, 5.seconds)
 
 // Execution in parallel
 val taskPar = for {
@@ -69,4 +81,4 @@ val taskPar = for {
   // starts when getUsers call and notifing users in parallel
   _ <- updateUsers(users).zip(Future.traverse(users)(notifyUserChange))
 } yield "done"
-Await.result(taskPar, 10.seconds)
+Await.result(taskPar, 5.seconds)

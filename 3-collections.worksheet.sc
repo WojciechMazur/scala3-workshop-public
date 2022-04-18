@@ -87,10 +87,7 @@ groupedByLastDigit.map { (key, seq) =>
   Integer.valueOf(key.toString) -> seq.sum
 }
 
-
-
 // Option
 // Option is a popular way of abstracting optional values
 Option(null: String).map(_.length)
 Option("msg").map(_.length)
-
