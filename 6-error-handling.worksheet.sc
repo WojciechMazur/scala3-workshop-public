@@ -25,21 +25,22 @@ Try {
   maybeFail()
 } match {
   case Success(v) => s"Successfy calculated '$v'"
-  case Failure(reason) => reason match {
-    case ex: MatchError => s"caught match error - ${ex.getMessage}"
-    case ex: Exception  => s"catched $ex" 
-  }
+  case Failure(reason) =>
+    reason match {
+      case ex: MatchError => s"caught match error - ${ex.getMessage}"
+      case ex: Exception  => s"catched $ex"
+    }
 }
 
 val tryResult = Try {
   println("I'm in a util.Try class")
   maybeFail()
 }
-.map(v => s"Successfy calculated '$v'")
-.recover{
-  case ex: MatchError => s"caught match error - ${ex.getMessage}"
-  case ex: Exception  => s"catched $ex" 
-}
+  .map(v => s"Successfy calculated '$v'")
+  .recover {
+    case ex: MatchError => s"caught match error - ${ex.getMessage}"
+    case ex: Exception  => s"catched $ex"
+  }
 
 // I want default value incase of failure
 tryResult.getOrElse("My defaultValue")

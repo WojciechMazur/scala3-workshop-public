@@ -13,7 +13,9 @@ import java.net.{URLEncoder, URLDecoder}
 object GameTests extends TestSuite {
   val auth: Option[RequestAuth] = None
 
-  def withServer[T](example: cask.main.Main, endpoint: String)(f: String => T): T = {
+  def withServer[T](example: cask.main.Main, endpoint: String)(
+      f: String => T
+  ): T = {
     val server = Undertow.builder
       .addHttpListener(8081, "localhost")
       .setHandler(example.defaultHandler)
@@ -83,7 +85,9 @@ object GameTests extends TestSuite {
 
       val guess = "Bohemian%20Rhapsody"
       val answer = "Queen"
-      val answer_enc = Base64.getEncoder.encodeToString(answer.getBytes(StandardCharsets.UTF_8))
+      val answer_enc = Base64.getEncoder.encodeToString(
+        answer.getBytes(StandardCharsets.UTF_8)
+      )
       test("submit") {
         test("wrong_answer") - withServer(CaskHttpServer, s"/submit") { host =>
 
@@ -96,7 +100,9 @@ object GameTests extends TestSuite {
           assert(
             body.contains("<title>Your results...</title>"),
             body.contains("<h1>Whoops...</h1>"),
-            body.contains(s"<div>The correct answer was $answer. <a href=\"/run\">Another go?</a>")
+            body.contains(
+              s"<div>The correct answer was $answer. <a href=\"/run\">Another go?</a>"
+            )
           )
         }
       }
@@ -111,7 +117,9 @@ object GameTests extends TestSuite {
           assert(
             body.contains("<title>Your results...</title>"),
             body.contains("<h1>Well done!</h1>"),
-            body.contains(s"<div>The correct answer was $answer. <a href=\"/run\">Another go?</a>")
+            body.contains(
+              s"<div>The correct answer was $answer. <a href=\"/run\">Another go?</a>"
+            )
           )
         }
       }
@@ -133,7 +141,7 @@ object GameTests extends TestSuite {
         }
       }
       test("loginUrl") {
-        val loginUrl = Spotify.loginUrl
+        val loginUrl = Spotify.LoginUrl
         assert(
           loginUrl == "https://accounts.spotify.com/authorize?client_id=1588c59aabee43ca9f4d30d5695a4a0c&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Fstart&scope=user-read-playback-state+user-modify-playback-state"
         )

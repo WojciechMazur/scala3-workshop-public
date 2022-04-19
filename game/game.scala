@@ -11,7 +11,6 @@
 import cask.*
 import requests.{Response => _, head => _, *}
 import scalatags.Text.all.*
-import os.*
 import upickle.default.*
 import java.util.Base64
 import java.nio.charset.StandardCharsets
@@ -19,13 +18,14 @@ import java.net.URLEncoder
 
 import scala.concurrent.*
 import scala.util.Random
+import com.github.vickumar1981.stringdistance.LevenshteinDistance
 
 object CaskHttpServer extends cask.MainRoutes {
 
   println("Logging client into Spotify")
   // Authorize user in the Spotify, get the RequestAuth
   // client credientails auth - allows to fetch playlists info
-  val auth: RequestAuth = Spotify.clientCredentials()
+  val authClientCredentials: RequestAuth = Spotify.clientCredentials()
   // Needs clinetId/secret and permissions scope, allows to control device
   var authCode: Option[RequestAuth] = None
 
@@ -33,20 +33,15 @@ object CaskHttpServer extends cask.MainRoutes {
   val playlist = ???
 
   // Get songs from the playlist
-  val playlistItems = ???
+  val playlistItems = Nil
 
   println("Starting web server on port 8080")
-
   @get("/")
   // Entry point - show link to login
   def entrypoint() = ???
 
   @get("/start")
-  def start(code: String) = {
-    // Authorize in and get 'authCode', then and redirect to /run
-    authCode = Some(Spotify.authorizationCode(code))
-    ???
-  }
+  def start(code: String) = ???
 
   @get("/run")
   def run(): Response.Raw = {
@@ -54,39 +49,18 @@ object CaskHttpServer extends cask.MainRoutes {
     // else:
     // choose random song from playlists
     // Send request to Spotify to start playing the song on device
+
     // Schedule a request that would stop playing song after some delay
     // Show form where user can insert their guess, it should contain:
     // * some clue about the cong
     // * should send the reuslt to /submit using post and encoding type 'application/x-www-form-urlencoded'
-
-    Response(
-      Template(
-        "Guess!",
-        h1("Guess the song!"),
-        div(s"Clue: ${???}"),
-        form(
-          action := "/submit",
-          method := "post",
-          enctype := UrlEncoded,
-          autocomplete := false
-        )(
-          input(
-            `type` := "hidden",
-            name := "answer",
-            // value := ???, // utf-64 encoded
-            width := "0%"
-          ),
-          input(`type` := "text", name := "guess", width := "80%"),
-          input(`type` := "submit", value := "Guess", width := "20%")
-        )
-      )
-    )
+    ???
   }
 
   @get("/login")
   def login() = {
     // Redirect to Spotify logining using OAuth
-    ???
+    Redirect(Spotify.LoginUrl)
   }
 
   @cask.postForm("/submit")
@@ -111,8 +85,8 @@ object Template:
 
 private final val UrlEncoded = "application/x-www-form-urlencoded"
 object Spotify:
-  private final val ClientId = "18500f030b0f414890a38c16e7391116"
-  private final val ClientSecret = "d015e1ed6d3c4a1082b9fd29b35688e5"
+  private final val ClientId = "1588c59aabee43ca9f4d30d5695a4a0c"
+  private final val ClientSecret = "d6dc6fb3f2e54982ab4af782ecb75a0e"
   private final val ClientAuth = RequestAuth.Basic(ClientId, ClientSecret)
   private final val RedirectUrl = "http://localhost:8080/start"
   private final val SpotifyApi = "https://api.spotify.com/v1"
@@ -126,44 +100,49 @@ object Spotify:
       "redirect_uri" -> RedirectUrl,
       "scope" -> "user-read-playback-state user-modify-playback-state"
     )
-    // Url encoced paramaters string
+    //Build URL encoded list of parameters
     val params = ???
     s"$SpotifyAuthUrl/authorize?$params"
 
   def clientCredentials(): RequestAuth =
     // Get access_token using credentials
     // https://developer.spotify.com/documentation/web-api/quick-start/ #Call the Spotify Accounts Service
-    // headers = Map("Content_Type" -> urlEncoded),
-    // params = Map("grant_type" -> "client_credentials"),
     // read access_token from response
-    ???
+    val accessToken = ???
+    RequestAuth.Bearer(accessToken)
 
   def authorizationCode(code: String): RequestAuth =
     // Use authorization code to obtain access_token
     // https://developer.spotify.com/documentation/web-api/quick-start/ #Call the Spotify Accounts Service
-    // s"$SpotifyAuthUrl/api/token"
-    // headers = Map("Content_Type" -> UrlEncoded),
-    // params = Map(
-    //   "grant_type" -> "authorization_code",
-    //   "code" -> code,
-    //   "redirect_uri" -> RedirectUrl
-    // )
-    // read access_token from response
+    val accessToken = ???
+    RequestAuth.Bearer(accessToken)
 
-    ???
+  def listPlaylists(user: String): List[Playlist] = ???
 
-  def listPlaylists(user: String)(using auth: RequestAuth): List[Nothing] =
-    // val playlists_url = s"$SpotifyApi/users/$user/playlists"
-    ???
+  def listPlaylistItems(playlist: Playlist): List[PlaylistItem] = ???
 
-  def listPlaylistItems(playlist: Nothing): List[Nothing] =
-    // s"$SpotifyApi/playlists/${playlist.id}/tracks"
-    ???
+  def play(playlist: Playlist, offset: Int) = ???
 
-  def play(playlist: Nothing, offset: Int)(using auth: RequestAuth) =
-    s"$SpotifyApi/me/player/play"
-    ???
+  def pause()(using auth: RequestAuth): Unit = ???
 
-  def pause()(using auth: RequestAuth): Unit =
-    s"$SpotifyApi/me/player/pause"
-    ???
+case class Playlist(uri: String, id: String, name: String)
+object Playlist {
+  given Reader[Playlist] = macroR
+}
+
+case class PlaylistItem(track: Track)
+object PlaylistItem {
+  given Reader[PlaylistItem] = macroR
+}
+case class Track(album: Album, name: String)
+object Track {
+  given Reader[Track] = macroR
+}
+case class Album(name: String, artists: List[Artist])
+object Album {
+  given Reader[Album] = macroR
+}
+case class Artist(name: String)
+object Artist {
+  given Reader[Artist] = macroR
+}
