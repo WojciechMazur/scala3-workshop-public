@@ -51,7 +51,8 @@ partialFunction("Hello" * 10)
 
 // Currying
 // Functions can take multiple arguments lists
-def replacePrefixWithSuffix(prefix: String)(on: String) = on.stripPrefix(prefix) + prefix
+def replacePrefixWithSuffix(prefix: String)(on: String) =
+  on.stripPrefix(prefix) + prefix
 replacePrefixWithSuffix("This Function")("This Function Is Curried")
 
 val replaceThis = replacePrefixWithSuffix("This")(_)
@@ -109,7 +110,7 @@ fiboncaciiTailRec(fibDepth) // Works fine
 fiboncacii(fibDepth) // Stack overflow
 // Non recusrsive version stack overflow in big depth, around n=7500
 
-// Alternative using lazy list
+// Alternative using lazy list for cached fibonacii
 val fibS: LazyList[Num] = 0 #:: fibS.scan(1: Num)(_ + _)
 // val fibS: LazyList[Num] =
 //   (0: Num) #:: (1: Num) #::

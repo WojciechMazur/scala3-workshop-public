@@ -1,39 +1,12 @@
-
-// git clone --branch workshop https://github.com/WojciechMazur/scala3-workshop.git
-
-
-
-
-
-Sieć: VL-HELP
-PASSOWORD: UAHELP22
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// W Scali najcześciej uzywa się nie mutowalnych zmiennych
+// Scala by default enforces usage of immutable values declared with val keyword
+// val <variableName> :<Type>? = <value>
+// The result type is optional, if its not explicitlly set the result type of variable would infered from it's right hand side
 val openingMessage = "Hello world"
+val otherMesage: String = "Hello Scala"
 // openingMessage = "" // Kompilator nie pozwoli nam przypisać ponownie do zmienej
 
-// Użycie zmiennej var pozwala na edytowanie wartości zmiennej
+// In case if you need to use mutable variable declare it using var keyword
+// Good practive is to treat mutable variables as advanced feature and used them only critical sections of the code
 var luckyNumber = 42
 luckyNumber += 1
 luckyNumber
@@ -42,13 +15,13 @@ luckyNumber
 
 // Funckję tworzymy za pomocą słowa kluczowego def
 // Ciało funkcji zostanie wykonane za każdym razem
-def getSomeNumber = 
+def getSomeNumber =
   println("getting some number")
   lazyInitializedNumber
 
 // lazy val służy stworzenia zmiennej która zostanie zainicjowana dopiero przy pierwszym użyciu
 // Jest to szczególnie przydatne przy cachowaniu obliczeń lub rozwiązywaniu cyklicznych zależności
-lazy val lazyInitializedNumber = 
+lazy val lazyInitializedNumber =
   println("creating lazy number")
   luckyNumber * 2 + 3
 
@@ -75,11 +48,11 @@ val str3 = f"Height: $d%2.3f, unformatted $d"
 
 // Instrukcja warunkowa w Scali ma dwie dostępne formy
 if luckyNumber < 10 then println("<10") // Nowa składnia: if <cond> then <then>
-else if (luckyNumber > 50) println(">50") // Składnia Scali 2: if (<cond>) (then)
+else if (luckyNumber > 50)
+  println(">50") // Składnia Scali 2: if (<cond>) (then)
 else {
   println("Between 10 and 50")
 }
-
 
 // Match w może być używany jak switch w innych językach
 util.Random.nextInt(10) match {
@@ -93,12 +66,12 @@ util.Random.nextInt(10) match {
 "foo" match {
   case "bar" => 0
   case "foo" => 1
-  case _ => -1
+  case _     => -1
 }
 
 Option.when(true)("Hello") match {
   case Some(msg) => msg
-  case None => "no msg"
+  case None      => "no msg"
 }
 
 // Pętle
@@ -128,8 +101,6 @@ while {
   println(next)
   iter2.hasNext && next._1 < 3
 } do ()
-
-
 
 // Input / output
 
