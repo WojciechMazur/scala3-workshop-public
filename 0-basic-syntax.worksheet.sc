@@ -1,8 +1,12 @@
-// W Scali najcześciej uzywa się nie mutowalnych zmiennych
+// Scala by default enforces usage of immutable values declared with val keyword
+// val <variableName> :<Type>? = <value>
+// The result type is optional, if its not explicitlly set the result type of variable would infered from it's right hand side
 val openingMessage = "Hello world"
+val otherMesage: String = "Hello Scala"
 // openingMessage = "" // Kompilator nie pozwoli nam przypisać ponownie do zmienej
 
-// Użycie zmiennej var pozwala na edytowanie wartości zmiennej
+// In case if you need to use mutable variable declare it using var keyword
+// Good practive is to treat mutable variables as advanced feature and used them only critical sections of the code
 var luckyNumber = 42
 luckyNumber += 1
 luckyNumber
