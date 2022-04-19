@@ -13,22 +13,38 @@ luckyNumber
 // luckyNumber = Math.sqrt(2.0)
 // luckyNumber
 
-// Funckję tworzymy za pomocą słowa kluczowego def
-// Ciało funkcji zostanie wykonane za każdym razem
-def getSomeNumber =
+// The function can be defined using def keyword
+// def <functionName>(paramName: Type*): ResultType = {body}
+// If the function does not take any arguments and does not produce any side-effects (it's a pure function)
+// the arguments list can be ommited
+def getSomeNumber() =
   println("getting some number")
-  lazyInitializedNumber
+  // In Scala return keyword is optional. Function would return the result of it's body expression
+  lazyInitializedNumber // This value is the last expression, it would be returned
 
-// lazy val służy stworzenia zmiennej która zostanie zainicjowana dopiero przy pierwszym użyciu
-// Jest to szczególnie przydatne przy cachowaniu obliczeń lub rozwiązywaniu cyklicznych zależności
+// Functions are a first class citizens in Scala, they can be also defined as values
+// val <functionName>: (inputType*) => returnType = {body}
+val addFive: Int => Int = { input =>
+  input + 5
+}
+// We can assign function to variables
+val addOp: Int => Int = addFive
+// Functions created as value can be used in the same way as standard methods
+addOp(10)
+// Function defined as a method can be converted to value by using _ operation
+val getNumber = getSomeNumber _
+
+// lazy val allows to define a variable for which initilization can be delayed
+// it would be initialized upon first usage
+// It allows to cache long running calculations and to resolve cyclic dependencies
 lazy val lazyInitializedNumber =
   println("creating lazy number")
   luckyNumber * 2 + 3
 
-getSomeNumber
-getSomeNumber
+getSomeNumber()
+getSomeNumber()
 
-// Dostępne typy primitywne:
+// Allowed primitive types:
 val b: Byte = 10
 val s: Short = 10
 val c: Char = 10
@@ -37,64 +53,93 @@ val l: Long = 10L
 val f: Float = 10.0f
 val d: Double = 10.0
 
-// Ciągi znaków
+val unit: Unit = () // Unit is the same as void in Java or C
+
+// Character sequences / Strings
 val str = "Hello"
 
-// Interpelacja stringow
-// Możliwe jest użycie zmiennych bądź wyrażeń do stworzenia nowego ciągu znaków
+// String interpolation
+// It's possible to use variables or expression to creation of a new string, you can use for that the s-String interpolator
 val str2 = s"$str Steve, it's ${(c + 12) % 24} o'clock"
-// A także ich dokładniejsze formatiwanie, np. określając liczbe miejsc po przecinku
+// f-String interpolator allows also to define a formating for the vriables
 val str3 = f"Height: $d%2.3f, unformatted $d"
+// raw-String interpolator allows the treated alll characters, except $ as escape literals
+val str4 = raw"/\.*$$asd"
+// Triple quoted strings can be used to create multi line strings and to escape double-quotes
+// .stripMargin would remove all the excess chars in each line before the margin character ('|' by default)
+val str5 = """{
+             |"key": "value"
+             |}""".stripMargin
 
-// Instrukcja warunkowa w Scali ma dwie dostępne formy
-if luckyNumber < 10 then println("<10") // Nowa składnia: if <cond> then <then>
-else if (luckyNumber > 50)
-  println(">50") // Składnia Scali 2: if (<cond>) (then)
+// Conditional excpessions
+if luckyNumber < 10 then
+  println("<10") // New syntax (Scala 3): if <cond> then <expr>
+else if (luckyNumber > 50) // Old syntax Scala 2: if (<cond>) <expr>
+  println(">50")
 else {
   println("Between 10 and 50")
 }
+// if the last else block is missing it would be always replaced internally with 'else ()', though the whole expression would return Unit
 
-// Match w może być używany jak switch w innych językach
-util.Random.nextInt(10) match {
+// Match might be used a switch in other languages
+// <cond> match {
+//  case <literal> => <expr>
+//  case <literal> if <cond> => <expr>
+//  case _ => <expr>
+// }
+// By default 'match' is internally transformed to if-else conditions chain
+// If the argument is an integer @switch annotation would try to force compiler to create table switch
+// instead of if-else chain. It would throw compile-time error if creation of table switch would not be possible
+(util.Random.nextInt(10): @scala.annotation.switch) match {
   case 0 => "Boom"
   case 1 => "Almost boom"
   case _ => "Not boom"
 }
 
-// Ale może służyć również do matchowanie na stringach oraz może używać pattern matchingu
-
+// The main purpose of match expression is patten matching, which is way more powerfull then switch
+// E.g. you can match the string literals
 "foo" match {
   case "bar" => 0
   case "foo" => 1
   case _     => -1
 }
 
+// Or you can match on complex types or event match on it's extracted values
 Option.when(true)("Hello") match {
-  case Some(msg) => msg
-  case None      => "no msg"
+  case Some("Hello") => "it was hello"
+  case Some(msg)     => msg
+  case None          => "no msg"
 }
 
-// Pętle
-
-// Do iterowanie po sekwencji możemy użyć pętli for-do
+// Loops
+// In Scala there is not typical for loop
+// You can only iterate on collections, eg. Range
 for n <- 0.until(5)
 do
   luckyNumber = util.Random.nextInt(100)
   println(luckyNumber)
+// It's a syntax sugar for `0.until(5).foreach(n => ...)`
 
-// Aby zapamiętać wynik iteracji można wykorzystać słowo kluczowe yield zamiast do
+// To save the results of iterations you replace for-do with for-yield
 val coords = for
   i <- 0 until 5 if i % 2 == 0
   j <- 0 until 5 if j % 2 != 0
 yield (i, j)
+// It's a sugar syntax for:
+// 0.until(5).filer(_ % 2 == 0).flatMap{i =>
+//   0.until(5).filter(_ % 2 != 0).map{j =>
+//     (i, j)
+//   }
+// }
 
-// Możemy również użyć pętli while-do
+// You can also perform a while-do loop
 val coordsIterator = coords.iterator
 while (coordsIterator.hasNext) {
   println(coordsIterator.next)
 }
 
-// // W Scali 3 nie jest dostępna pętla do-while, ale możemy zastąpić ją odpowiednio skonstrukowaną pętla while-do
+// In Scala 3 there is not longer a do-while loop,
+// However it can be replaced with correctly constructed while-do loop
 var iter2 = coords.iterator
 while {
   val next = iter2.next
@@ -103,9 +148,7 @@ while {
 } do ()
 
 // Input / output
-
 println("Hello world")
-
 // import scala.io.StdIn
 // val line = StdIn.readLine()
 // val boolean = StdIn.readBoolean()

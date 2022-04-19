@@ -1,83 +1,96 @@
-/** W Scali wszystko ma jakiś typ
+/** Everyting in Scala is typed
   * https://docs.scala-lang.org/tour/unified-types.html Any / \ AnyVal AnyRef
   * Int Long Unit Float Double | String Option <custom types> \ | / Nothing
   */
 
+// AnyVal is a base type of all primitive values
 var anyVal: AnyVal = _
 anyVal = 1
 anyVal = 1L
 anyVal = 1.0f
 anyVal
 
+// AnyRef is a base type of all the reference types
 var anyRef: AnyRef = _
 anyRef = "Hello"
 anyRef = Some(1)
 anyRef = List(1, 2, 3)
 
+// Any is supertype of AnyVal and AnyRef
 var any: Any = _
 any = anyVal
 any = anyRef
 
-// Unit jest typem który reprezentuje brak wartości (void z innych języków)
+// Unit declares no result (void from Java or C)
 anyVal = ()
 
-// Nothing jest typem opisującym wartości których nie da się stworzyć w żaden sposób
-// W praktyce opisuje on operacje które rzucają wyjątek
+// Nothing is an abstract type describing an expression which never yields any value, not even an Unit
+// Nothing is only a typer construct, it can never be achived in the runtime
+// In practice Nothing is a type for expressions throwing exceptions
 def fail: Nothing = throw new RuntimeException("Failed")
 def notImplemented: Nothing = ???
-
+// Nothing is a subtype of each possible type, it can be assigned any variable
 // any = fail
 
-/// Custom types
-
-// Główny konstructor przymuje 2 argumenty (Int, String) oraz tworzy prywatne pola foo, bar wewnątrz klasy
+// Custom types
+// class always defines a main class constructor,
+// In this case constructor takes 2 arguments (Int, String), the arguments would be used to create a private fields foo: Int, and bar: String in the class
 class MyClass(foo: Int, bar: String = "") {
-  // Drugorzędny kontruktor dla classy
-  def this(string: String) = this(string.length, string)
+  // Auxilary constructor needs to call main or other auxilary constructor as the first expression
+  def this(string: String) =
+    this(string.length, string)
+    println("I've used an auxilary construcotr")
 
   private val fooBar = s"$foo$bar"
 
   def length = bar.length
 
-  // Wszystkie wyrażenia które nie są definicjami metod lub pól wewnątrz klasy zostają wykonane w trakcie wykonywanie głownego konstruktowa
+  // All expressions which are not definitions/declarations of methods and fields would be evaluated while exectuing the main constructor
+  // They should be treated as part of main constructor
   println("MyClass is beining initialized")
 }
 
-// object służy do utworzenia klasy która posiada tylko jedna instancję (singleton)
-// jeśli object ma taką samą nazwę jak klasa zdefiniowana w tym samym pliku to nazywamy go 'companion object'
+// object allows to define a class which has only 1 instance (singleton type)
+// if object has the same name as the class defined in the same file we call it the companion object
 object MyClass {
-  // Wszystkie metody i pola wewnątrz obiektu są statyczne
+  // All of the fields and methods withing object are treated as statically accessible (static in Java)
   final val DefaultName = "MyClassConstantString"
   def createInstance(n: Int) = new MyClass(n, DefaultName)
 }
 
-// Type może dziedzić po wyłacznie 1 innej klasie
+// Every class can inherit from only 1 other class
 abstract class Foo(x: Int) {
   def foo: Int
   def fooString = foo.toString + x
 }
 
-// Type może implementować wiele róznych traitów
+// trait defines an abstract type defining both abstract and implemented methods and fields
+// Each class can inherit from multiple traits
 trait Bar(x: Int) {
   def bar: Int
   def barString = bar.toString + x
 }
 
+// class inheriting from abstract class and from trait
 class FooBar extends Foo(0) with Bar(42) {
+  // It's a good practive to use 'override' keyword when implementing abstract field/method, but it's optional
   override def foo: Int = ???
   override def bar: Int = ???
+  // Overriding non-abstract method required using the override keyword, otherwise compiler would throw error
+  override val barString = "FooBar"
 }
-// class FooBar extends Bar(0) with Foo(42) // kolejnośc ma znaczenie
+// class FooBar extends Bar(0) with Foo(42) // order matters
 new FooBar()
 
+// traits/classes declared with `sealed` modifier can be only defined withing the same file
 sealed trait Contact
-
-// Case classy podobnie generują klasy podobnie jak zwykłe klasy, ale:
-// - pola konstruktora stają się publicznymi, a nie prywatnymi polami
-// - posiadają zdefiniowane metody equals, hashCode, toString bazujące na polach konstruktora
-// - definiują metodę unapply w konstrukotrze pozwalając na użycie w pattern matching
-// - W Scali 2 definiują metodę apply dzięki czemu nie trzeba używa słowa kluczowego new
-// - case classa nie może dziedziczyć po innej case klasie!
+// Case classes are distinct from reqular classess in a few cases
+// - fields of the constructor would be become public fields, instead of being private
+// - methods equals, hashCode, toString are automatically overriden based on the main constructor arguments
+// - automatically define unapply method in the companion object allowing to extract main constructor arguments in pattern matching
+// - defines an apply method in companion object, allowing to skip 'new' keyword
+// - case class cannot inherit from other case class
+// In some aspects case classess are similiar to Records in Java
 case class Person(name: String, age: Int) extends Contact
 case object Organization extends Contact
 
@@ -88,13 +101,11 @@ contact match {
   case _                  => "Hey stranger"
 }
 
-// Klasy oraz traity oznaczone jako sealed mogę być dziedziczone tylko wewnątrz pojedyńczego pliku
 sealed trait Animal
-// Domyślnie wszystkie typy są publiczne
+// By default all the types are public (in Java they are package private)
 private class Dog(breed: String) extends Animal
 protected object Elephant extends Animal
-
-// Aby zdefiniować typ o dostępie package-private podaj nazwę pakietu
+// to define a package private method use private[package] syntax
 // private[somepackage] abstract class Cat extends Animal
 
 // Enums
@@ -109,7 +120,7 @@ color.hex
 enum Shape:
   case Circe, Square, Triangle
 
-// Aliasy typów
+// Type aliases
 type Meter = Double
 val distance: Meter = 10
 
@@ -134,8 +145,8 @@ doSomething(new A {})
 doSomething(new B {})
 doSomething(new A with B)
 
-// Generics
-
+// Generic types
+// Generic types can be used both for data structures and methods by specifing generic type symbols in the square brackets
 def log[T](v: T) = println(s"It's $v")
 log("a message")
 log(42.0)
@@ -147,6 +158,8 @@ case class Crocodile(name: String) extends Animal
 case class Cat(name: String) extends Pet
 case class Hamster(name: String) extends Pet
 
+// Type guards can be enfored on the generic type
+// T needs to be a subtype of Pet
 def pet[T <: Pet](toPet: T) = {
   println(s"Petting $toPet with name ${toPet.name}")
 }
@@ -154,15 +167,6 @@ def pet[T <: Pet](toPet: T) = {
 pet(Cat("Alex"))
 // pet(Crocodile("T-rex"))
 pet(new Dog("Golden Retriver") with Pet { def name: String = "Scruffy" })
-
-def add[T: Numeric](left: T, right: T): T = {
-  summon[Numeric[T]].plus(left, right)
-}
-
-add(1, 1)
-add(1.0, 2.0)
-// Different types, want compile
-// add(1.toByte, 1)
 
 // Variance of generic types - Invariance, covariance, contravariance
 

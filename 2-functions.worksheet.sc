@@ -1,6 +1,6 @@
-// Funkcje korzystające z argumentów przekazanych  by-name vs by-value
+// Arguments can be passed to functions using one of the 2 conventions: by-name (lazy) or by-value
 
-// Przykład funkcji przyjmującej argument by-value - arg będzie obliczone przed przekazaniem do tej funkcji
+// by-value - arg needs to be calculated before passsing to the function
 def stringLength(arg: String): Int = {
   println("Calculating string length")
   val length = arg.length
@@ -8,8 +8,8 @@ def stringLength(arg: String): Int = {
   length
 }
 
-// Przykład funkcji przekazującej parametry by-name ( => ) - arg zostanie obliczony w momencie użycia
-// Uwaga! Jeśli argument jest zdefiniowany jako funkcja i zostanie wykonany wielokrotnie wewnątrz funkcji to zostanie on obliczony za każdym razem!
+// by-name ( => ) - arg would be calcuated lazily upon the first usage
+// Caution! If the by-name arguments is defined as a function it would be evaluated every time it would be used in the function body
 def byNameStringLength(arg: => String): Int = {
   println("executed by name")
   byNameStep2(arg)
@@ -28,19 +28,21 @@ def noisyString = makeNoisyString
 stringLength(noisyString)
 byNameStringLength(noisyString)
 
-// Lambda vs closure
 val msg = "Hello world!"
-// Lambda posiada wszystkie argumenty przekazane bezpośrednio do funkcji
+// Lambda is alternative name for an anonymous function
 val x = (n: Int) => println("hello! " * n)
 x(3)
-// Closure korzysta ze zmiennych które nie są do niej przekazane
+// Closure is any function which uses a free-variables - variables which are not passed directly to the function via arguments
+// free-variable is defined somewhere in the context of the function, in our case it's val msg: String
 val y = (n: Int) => println(msg * n)
 y(3)
 
-// Każdą funckję można przypisać do zmiennej
+// Each function can be assigned to a variable
 val functionAsValue = stringLength _
 functionAsValue(msg)
 
+// Partial function is a function which does not define a result all it's possible arguments
+// It can define diffrent results depending on the input
 val partialFunction: PartialFunction[String, String] = {
   case "SECRET"               => "It's confidential"
   case str if str.length > 10 => "Oh come on, it's to long!!!"
