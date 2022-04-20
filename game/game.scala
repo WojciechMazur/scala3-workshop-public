@@ -1,9 +1,9 @@
-//> using lib "com.lihaoyi::cask:0.8.0"
-//> using lib "com.lihaoyi::requests:0.7.0"
-//> using lib "com.lihaoyi::scalatags:0.11.1"
-//> using lib "com.lihaoyi::os-lib:0.8.0"
-//> using lib "com.lihaoyi::upickle:1.4.4"
-//> using lib "com.github.vickumar1981:stringdistance_2.13:1.2.6"
+//> using lib "com.lihaoyi::cask:0.8.0"       // https://com-lihaoyi.github.io/cask/
+//> using lib "com.lihaoyi::upickle:1.4.4"    // https://com-lihaoyi.github.io/upickle/
+//> using lib "com.lihaoyi::scalatags:0.11.1" // https://com-lihaoyi.github.io/scalatags/
+//> using lib "com.lihaoyi::requests:0.7.0"   // https://github.com/com-lihaoyi/requests-scala
+//> using lib "com.lihaoyi::os-lib:0.8.0"     // https://github.com/com-lihaoyi/os-lib
+//> using lib "com.github.vickumar1981:stringdistance_2.13:1.2.6" // https://github.com/vickumar1981/stringdistance
 //> using resourceDir "./styles/"
 
 import cask.*
@@ -21,7 +21,6 @@ object CaskHttpServer extends cask.MainRoutes {
   // Player to control device, needs auth-code
   var player: Option[Spotify.Player] = None
 
-  println("Starting web server on port 8080")
   @get("/")
   def entrypoint() =
     // Entry point - show link to login
@@ -79,6 +78,7 @@ object CaskHttpServer extends cask.MainRoutes {
     ???
   }
 
+  println("Starting web server on port 8080...")
   initialize()
 }
 
@@ -144,11 +144,10 @@ object Spotify:
   // Device controler, needs auth-code authorization
   class Player()(using auth: RequestAuth) {
     // https://developer.spotify.com/console/put-play/
-    // https://developer.spotify.com/console/put-play/
-    def play(playlist: Playlist, offset: Int) = ???
+    // https://api.spotify.com/v1/me/player/play
+    def play(playlist: Playlist, trackIdx: Int) = ???
 
-    // https://developer.spotify.com/console/put-pause/): Unit = ???
-
+    // https://developer.spotify.com/console/put-pause/)
     // https://api.spotify.com/v1/me/player/pause
     def pause(): Unit = ???
   }
@@ -160,7 +159,7 @@ case class Track(album: Album, name: String)
 case class Album(name: String, artists: List[Artist])
 case class Artist(name: String)
 
-// Macro generated json reders
+// Macro generated json readers
 given Reader[Playlist] = macroR
 given Reader[PlaylistRef] = macroR
 given Reader[PlaylistEntry] = macroR
