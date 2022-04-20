@@ -7,40 +7,34 @@
 //> using resourceDir "./styles/"
 
 import cask.*
+// Import everything from requests except Response and head
 import requests.{Response => _, head => _, *}
 import scalatags.Text.all.*
+// Import read from package ujson using alias name 'parse'
+import ujson.{read => parse}
 import upickle.default.*
-import java.util.Base64
-
-import scala.concurrent.*
-import scala.util.Random
 import com.github.vickumar1981.stringdistance.LevenshteinDistance
 
 object CaskHttpServer extends cask.MainRoutes {
+  val repo: Spotify.Repository = ???
 
-  println("Logging client into Spotify")
-  // Authorize user in the Spotify, get the RequestAuth
-  // client credientails auth - allows to fetch playlists info
-  val authClientCredentials: RequestAuth = Spotify.Auth.clientCredentials()
-  // Needs clinetId/secret and permissions scope, allows to control device
-  var authCode: Option[RequestAuth] = None
-
-  // Get playlists, select one
-  val playlist = ???
-
-  // Get songs from the playlist
-  val playlistItems = Nil
+  // Player to control device, needs auth-code
+  var player: Option[Spotify.Player] = None
 
   println("Starting web server on port 8080")
   @get("/")
-  // Entry point - show link to login
-  // <div> click <a href=LoginUrl> here </a> to login </div>
-  def entrypoint() = ???
+  def entrypoint() =
+    // Entry point - show link to login
+    // Spotify should redirect to /start in the response
+    // <div> click <a href=LoginUrl> here </a> to login </div>
+    ???
 
-  // Get the authorization code from the Spotify
-  // Redirect to /run
   @get("/start")
-  def start(code: String) = ???
+  def start(code: String) =
+    // Get the authorization code from the Spotify
+    // Create an instance of Player
+    // Redirect to /run
+    ???
 
   @get("/run")
   def run(): Response.Raw = {
@@ -61,14 +55,13 @@ object CaskHttpServer extends cask.MainRoutes {
      *  <input type=submit value=Guess/>
      * </form>
      */
-
     ???
   }
 
   @get("/login")
   def login() = {
     // Redirect to Spotify logining using OAuth
-    Redirect(Spotify.LoginUrl)
+    Redirect(Spotify.Auth.AuthorizeUrl)
   }
 
   @cask.postForm("/submit")
@@ -90,16 +83,19 @@ object CaskHttpServer extends cask.MainRoutes {
 }
 
 object Template:
-  private lazy val styles =
-    tag("style")(
-      os.read(os.resource(getClass.getClassLoader) / "styles.css")
-    )
+  // A common template for all the responses
   def apply(title: String)(
       content: scalatags.generic.Modifier[scalatags.text.Builder]*
   ): scalatags.Text.all.doctype =
     doctype("html")(
       html(styles, head(tag("title")(title)), body(content: _*))
     )
+
+  private lazy val styles =
+    tag("style")(
+      os.read(os.resource(getClass.getClassLoader) / "styles.css")
+    )
+end Template
 
 private final val UrlEncoded = "application/x-www-form-urlencoded"
 object Spotify:
@@ -110,16 +106,16 @@ object Spotify:
   private final val SpotifyApi = "https://api.spotify.com/v1"
   private final val SpotifyAuthUrl = "https://accounts.spotify.com"
 
-  final val LoginUrl: String =
-    // https://developer.spotify.com/documentation/web-api/quick-start/ #Call the Spotify Accounts Service
-    // https://developer.spotify.com/documentation/general/guides/authorization/code-flow/
-    import java.nio.charset.StandardCharsets
-    import java.net.URLEncoder
-    val scope = "user-read-playback-state user-modify-playback-state"
-    val params = ???
-    s"$SpotifyAuthUrl/authorize?$params"
-
   object Auth {
+    final val AuthorizeUrl: String =
+      // https://developer.spotify.com/documentation/web-api/quick-start/ #Call the Spotify Accounts Service
+      // https://developer.spotify.com/documentation/general/guides/authorization/code-flow/
+      import java.nio.charset.StandardCharsets
+      import java.net.URLEncoder
+      val scope = "user-read-playback-state user-modify-playback-state"
+      val params = ???
+      s"$SpotifyAuthUrl/authorize?$params"
+
     def clientCredentials(): RequestAuth =
       // Get access_token using client-credentials
       // https://developer.spotify.com/documentation/general/guides/authorization/client-credentials/
@@ -134,31 +130,40 @@ object Spotify:
       RequestAuth.Bearer(accessToken)
   }
 
-  // https://developer.spotify.com/console/get-playlists/
-  // https://api.spotify.com/v1/users/{user_id}/playlists
-  def listPlaylists(user: String): List[Playlist] = ???
+  // Repository of Spotify resources, needs only client-credentials auth
+  class Repository()(using auth: RequestAuth) {
+    // https://developer.spotify.com/console/get-playlists/
+    // https://api.spotify.com/v1/users/{user_id}/playlists
+    def listUserPlaylists(user: String): List[PlaylistRef] = ???
 
-  // https://developer.spotify.com/console/get-playlist-tracks/
-  // https://api.spotify.com/v1/playlists/{playlist_id}/tracks
-  def listPlaylistItems(playlist: Playlist): List[PlaylistItem] = ???
+    // https://developer.spotify.com/console/get-playlist-tracks/
+    // https://api.spotify.com/v1/playlists/{playlist_id}/tracks
+    def listPlaylist(playlist: Playlist): List[PlaylistEntry] = ???
+  }
 
-  // https://developer.spotify.com/console/put-play/
-  // https://developer.spotify.com/console/put-play/
-  def play(playlist: Playlist, offset: Int) = ???
+  // Device controler, needs auth-code authorization
+  class Player()(using auth: RequestAuth) {
+    // https://developer.spotify.com/console/put-play/
+    // https://developer.spotify.com/console/put-play/
+    def play(playlist: Playlist, offset: Int) = ???
 
-  // https://developer.spotify.com/console/put-pause/
-  // https://api.spotify.com/v1/me/player/pause
-  def pause()(using auth: RequestAuth): Unit = ???
+    // https://developer.spotify.com/console/put-pause/): Unit = ???
 
-case class Playlist(uri: String, id: String, name: String)
-case class PlaylistItem(track: Track)
+    // https://api.spotify.com/v1/me/player/pause
+    def pause(): Unit = ???
+  }
+
+case class Playlist(items: List[PlaylistEntry])
+case class PlaylistRef(uri: String, name: String, id: String)
+case class PlaylistEntry(track: Track)
 case class Track(album: Album, name: String)
 case class Album(name: String, artists: List[Artist])
 case class Artist(name: String)
 
 // Macro generated json reders
+given Reader[Playlist] = macroR
+given Reader[PlaylistRef] = macroR
+given Reader[PlaylistEntry] = macroR
+given Reader[Track] = macroR
 given Reader[Album] = macroR
 given Reader[Artist] = macroR
-given Reader[Playlist] = macroR
-given Reader[PlaylistItem] = macroR
-given Reader[Track] = macroR
