@@ -23,7 +23,7 @@ object CaskHttpServer extends cask.MainRoutes {
   println("Logging client into Spotify")
   // Authorize user in the Spotify, get the RequestAuth
   // client credientails auth - allows to fetch playlists info
-  val authClientCredentials: RequestAuth = Spotify.clientCredentials()
+  val authClientCredentials: RequestAuth = Spotify.Auth.clientCredentials()
   // Needs clinetId/secret and permissions scope, allows to control device
   var authCode: Option[RequestAuth] = None
 
@@ -83,8 +83,8 @@ object Template:
 
 private final val UrlEncoded = "application/x-www-form-urlencoded"
 object Spotify:
-  private final val ClientId = "1588c59aabee43ca9f4d30d5695a4a0c"
-  private final val ClientSecret = "d6dc6fb3f2e54982ab4af782ecb75a0e"
+  private final val ClientId = "03347033c0d845df8b8e8e1543e7a3e4"
+  private final val ClientSecret = "6c3ae75b97e04cba8cd8f7c80a8371d0"
   private final val ClientAuth = RequestAuth.Basic(ClientId, ClientSecret)
   private final val RedirectUrl = "http://localhost:8080/start"
   private final val SpotifyApi = "https://api.spotify.com/v1"
@@ -98,23 +98,24 @@ object Spotify:
       "redirect_uri" -> RedirectUrl,
       "scope" -> "user-read-playback-state user-modify-playback-state"
     )
-    //Build URL encoded list of parameters
+    // Build URL encoded list of parameters
     val params = ???
     s"$SpotifyAuthUrl/authorize?$params"
 
-  def clientCredentials(): RequestAuth =
-    // Get access_token using credentials
-    // https://developer.spotify.com/documentation/web-api/quick-start/ #Call the Spotify Accounts Service
-    // read access_token from response
-    val accessToken = ???
-    RequestAuth.Bearer(accessToken)
+  object Auth {
+    def clientCredentials(): RequestAuth =
+      // Get access_token using client-credentials
+      // https://developer.spotify.com/documentation/general/guides/authorization/client-credentials/
+      // read access_token from response
+      val accessToken = ???
+      RequestAuth.Bearer(accessToken)
 
-  def authorizationCode(code: String): RequestAuth =
-    // Use authorization code to obtain access_token
-    // https://developer.spotify.com/documentation/web-api/quick-start/ #Call the Spotify Accounts Service
-    val accessToken = ???
-    RequestAuth.Bearer(accessToken)
-
+    def authorizationCode(code: String): RequestAuth =
+      // Use authorization code to obtain auth code
+      // https://developer.spotify.com/documentation/general/guides/authorization/code-flow/
+      val accessToken = ???
+      RequestAuth.Bearer(accessToken)
+  }
   def listPlaylists(user: String): List[Playlist] = ???
 
   def listPlaylistItems(playlist: Playlist): List[PlaylistItem] = ???
@@ -124,23 +125,13 @@ object Spotify:
   def pause()(using auth: RequestAuth): Unit = ???
 
 case class Playlist(uri: String, id: String, name: String)
-object Playlist {
-  given Reader[Playlist] = macroR
-}
-
 case class PlaylistItem(track: Track)
-object PlaylistItem {
-  given Reader[PlaylistItem] = macroR
-}
 case class Track(album: Album, name: String)
-object Track {
-  given Reader[Track] = macroR
-}
 case class Album(name: String, artists: List[Artist])
-object Album {
-  given Reader[Album] = macroR
-}
 case class Artist(name: String)
-object Artist {
-  given Reader[Artist] = macroR
-}
+
+given Reader[Album] = macroR
+given Reader[Artist] = macroR
+given Reader[Playlist] = macroR
+given Reader[PlaylistItem] = macroR
+given Reader[Track] = macroR
