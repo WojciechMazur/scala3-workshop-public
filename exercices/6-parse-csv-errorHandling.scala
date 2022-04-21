@@ -1,6 +1,6 @@
 //> using:
 //>   lib "com.lihaoyi::utest::0.7.10"
-//>   target scope "test"
+//>   target { scope "test" }
 package ex6
 
 import utest._

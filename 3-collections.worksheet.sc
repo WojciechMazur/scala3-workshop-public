@@ -10,7 +10,7 @@ val map = Map(
   ("John", "Smith")
 )
 val range = 0 until 20 // exclusive range 0..19
-val rangeIn = 0 to 20  // inclusive range 0..20
+val rangeIn = 0 to 20 // inclusive range 0..20
 
 // Elements of the LazyListy are evaluated lazily upon the first usage
 val stream = LazyList.from(0)
@@ -75,7 +75,7 @@ nums.lastOption
 nums.indexWhere(_ == 13)
 nums.lastIndexWhere(_ == 42)
 
-// Reducing the collections 
+// Reducing the collections
 // Fold takes an initial value (state) and a function mapping the state and the current collection element returning a new state
 val factorial = 1L.to(5L).fold(1L) { (acc, elem) => acc * elem }
 
